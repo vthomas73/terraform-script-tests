@@ -1,5 +1,7 @@
-import os
-import re
+import argparse
+from re import sub
+from utilities import logging 
+import subcommands
 
 RESOURCES_PATH = '../../resources/'
 AWS_PATH = "terraform-provider-aws/"
@@ -7,100 +9,62 @@ AZURE_PATH = "terraform-provider-azurerm/"
 GCP_PATH = "terraform-provider-google/"
 PROVIDER_DOC_PATH = "website/docs/r/"
 
+logger = logging.get_logger(__name__)
 
-class ResourceDetails:
-    def __init__(self, resource_name, attributes_details, outputs_details) -> None:
-        self.name = resource_name
-        self.attributes = attributes_details
-        self.outputs = outputs_details
+def dowload_provider(args):
+    print("dowload_provider" + str(args))
 
-    def print_description(self):
-        print("Resource = {}".format(self.name))
-        for attr in self.attributes:
-            attr.print_description()
-        for out in self.outputs:
-            out.print_description()
+def get_provider_details(args):
+    print("get_provider_details" + str(args))
+    
+def list_providers(args):
+    print("list_providers" + str(args))
 
+def cli():
+    parser = argparse.ArgumentParser(description='Manage terraform providers and their resources')
+    subparsers = parser.add_subparsers(
+        title='Download, get or list providers',
+        metavar='command')
 
-class OutputDetails:
-    def __init__(self, name, description) -> None:
-        self.name = name
-        self.description = description
+    parser.add_argument(
+        '--provider-folder', default='./folder',
+        help='providers resource folder')
 
-    def print_description(self):
-        print("Name = {}, description = {}".format(
-            self.name, self.description))
-
-
-class AttributeDetails:
-    def __init__(self, name, required, description) -> None:
-        self.name = name
-        self.required = required
-        self.description = description
-
-    def print_description(self):
-        print("Name = {}, required = {}, description = {}".format(
-            self.name, self.required, self.description))
-
-
-def get_resource_name(file_path):
-    regex = r"^# Resource: (?P<resource_name>\w*)$"
-    with open(file_path, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-        for l in lines:
-            result = re.search(regex, l)
-            if result:
-                return result.group('resource_name')
+    dowload_parser = subparsers.add_parser(
+        'download',
+        help='Download provider')
+    dowload_parser.add_argument(
+        'provider-name',
+        help='provider name to download. Ex: hashicorp/aws')
+    dowload_parser.add_argument(
+        '--api-hostname', default='registry.terraform.io',
+        help='terraform registry url')
+    dowload_parser.add_argument(
+        '--provider-version', default='latest',
+        help='provider version to download. Ex: 4.25.0')
+    dowload_parser.set_defaults(handle=subcommands.download)
 
 
-def get_arguments(file_path):
-    regex = r"\* `(?P<variable_name>.*)` - \((?P<is_optional>\w*)\) (?P<description>(?:.|\n)*?(?=\n\*|$))"
-    attrs = []
-    with open(file_path, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-        for l in lines:
-            result = re.search(regex, l)
-            if result:
-                attr = AttributeDetails(result.group('variable_name'), True if result.group(
-                    'is_optional') == "Required" else False, result.group('description'))
-                attrs.append(attr)
-    return attrs
+    get_parser = subparsers.add_parser(
+        'get',
+        help='Get provider details')
+    get_parser.add_argument(
+        'provider',
+        help='provider to download')
+    get_parser.set_defaults(handle=subcommands.get)
 
-def get_outputs(file_path):
-    regex = r"\* `(?P<output_name>.*)` - (?P<description>(?:.|\n)*?(?=\n\*|$))"
-    attrs = []
-    with open(file_path, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-        for l in lines:
-            result = re.search(regex, l)
-            if result:
-                attr = OutputDetails(result.group(
-                    'output_name'), result.group('description'))
-                attrs.append(attr)
-    return attrs
+    list_parser = subparsers.add_parser(
+        'list',
+        help='List providers')
+    list_parser.set_defaults(handle=subcommands.list)
+
+    parser.parse_args()  
+    args = parser.parse_args()
+    if not hasattr(args, 'handle'):
+        parser.print_help()
+    else:
+        args.handle(args)
 
 
-def get_resources_details(doc_path):
-    provider_resources_details = []
-    for file in os.listdir(doc_path):
-        if file.endswith(".markdown"):
-            path = os.path.join(doc_path, file)
-            resource_name = get_resource_name(path)
-            attrs = get_arguments(path)
-            outputs = get_outputs(path)
-            provider_resources_details.append(
-                ResourceDetails(resource_name, attrs, outputs))
-    return provider_resources_details
-
-
-aws_resources_details = get_resources_details(
-    os.path.join(RESOURCES_PATH, AWS_PATH, PROVIDER_DOC_PATH))
-azure_resources_details = get_resources_details(
-    os.path.join(RESOURCES_PATH, AZURE_PATH, PROVIDER_DOC_PATH))
-gcp_resources_details = get_resources_details(
-    os.path.join(RESOURCES_PATH, GCP_PATH, PROVIDER_DOC_PATH))
-
-
-print('Resources trouvées : {}'.format(len(aws_resources_details)))
-print('Resources trouvées : {}'.format(len(azure_resources_details)))
-print('Resources trouvées : {}'.format(len(gcp_resources_details)))
+if __name__ == "__main__":
+    cli()
