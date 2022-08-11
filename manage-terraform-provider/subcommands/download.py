@@ -13,19 +13,16 @@ import os
 import shutil
 import re
 from pathlib import Path
+from .constants import *
 sys.path.append('../utilities')
 from utilities import logging, loading
 # from utilities import logging, loading
-
 
 logger = logging.get_logger(__name__)
 
 PROVIDER_API_PROTOCOL = "https"
 PROVIDERS_API_PATH = '/v1/providers'
-PROVDER_MARKDOWN_FOLDER = 'docs/'
 TEMPLATES_FOLDER = '{}/resources/templates/'.format(Path(__file__).parent)
-PROVIDER_TF_TEMPLATE_FILE = 'provider.tf'
-PROVIDER_DATA_FILE = 'data.json'
 
 
 def get_focused_provider_api_url(terraform_api_hostname, provider_name, provider_version):
@@ -101,7 +98,7 @@ def add_data_description(workdir, data_file_name=PROVIDER_DATA_FILE):
             outfile.write(json.dumps(resource_schemas))
         with open(os.path.join(workdir, 'data.json'), "w") as outfile:
             outfile.write(json.dumps(data_source_schemas))
-            
+
         text_file = open(os.path.join(workdir, 'resources_schemas.json'), "w")
         text_file.write(json.dumps(provider_schemas))
         text_file.close()
@@ -181,7 +178,7 @@ def download_provider_documentation(repository_url, tag, target_folder, temporar
         shutil.rmtree(temporary_folder)
 
 
-def download(args):
+def download_cmd(args):
     terraform_api_hostname = vars(args)['api_hostname']
     provider_resources_folder = vars(args)['provider_folder']
 
@@ -204,7 +201,7 @@ def download(args):
             logger.info(
                 'provider found')
             try:
-                full_path = os.path.join(provider_resources_folder,
+                full_path = os.path.join(provider_resources_folder, terraform_api_hostname,
                                          provider_name, provider_version)
                 provider_alias = provider_name.split('/')[-1]
                 if not os.path.isdir(full_path):

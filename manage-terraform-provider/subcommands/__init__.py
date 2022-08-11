@@ -1,3 +1,3 @@
-from .download import download
-from .get import get
-from .list import list
+from .download import download_cmd
+from .get import get_cmd
+from .list import list_cmd

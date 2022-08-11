@@ -1,5 +1,4 @@
 import argparse
-from re import sub
 from utilities import logging
 import subcommands
 
@@ -47,7 +46,7 @@ def cli():
     dowload_parser.add_argument(
         '--provider-version', default='latest',
         help='provider version to download. Ex: 4.25.0')
-    dowload_parser.set_defaults(handle=subcommands.download)
+    dowload_parser.set_defaults(handle=subcommands.download_cmd)
 
     get_parser = subparsers.add_parser(
         'get',
@@ -55,12 +54,12 @@ def cli():
     get_parser.add_argument(
         'provider',
         help='provider to download')
-    get_parser.set_defaults(handle=subcommands.get)
+    get_parser.set_defaults(handle=subcommands.get_cmd)
 
     list_parser = subparsers.add_parser(
-        'list',
+        'list', aliases=['ls'],
         help='List providers')
-    list_parser.set_defaults(handle=subcommands.list)
+    list_parser.set_defaults(handle=subcommands.list_cmd)
 
     parser.parse_args()
     args = parser.parse_args()

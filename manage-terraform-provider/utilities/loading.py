@@ -44,5 +44,4 @@ class Loading:
             print(f"\r{self.end}", flush=True)
 
     def __exit__(self, exc_type, exc_value, tb):
-        # handle exceptions with those variables ^
         self.stop()

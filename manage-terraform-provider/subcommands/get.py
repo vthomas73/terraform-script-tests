@@ -1,2 +1,2 @@
-def get(args):
+def get_cmd(args):
     print("salut")
