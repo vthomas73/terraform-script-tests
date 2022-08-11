@@ -1,6 +1,6 @@
 import argparse
 from re import sub
-from utilities import logging 
+from utilities import logging
 import subcommands
 
 RESOURCES_PATH = '../../resources/'
@@ -11,23 +11,28 @@ PROVIDER_DOC_PATH = "website/docs/r/"
 
 logger = logging.get_logger(__name__)
 
+
 def dowload_provider(args):
     print("dowload_provider" + str(args))
 
+
 def get_provider_details(args):
     print("get_provider_details" + str(args))
-    
+
+
 def list_providers(args):
     print("list_providers" + str(args))
 
+
 def cli():
-    parser = argparse.ArgumentParser(description='Manage terraform providers and their resources')
+    parser = argparse.ArgumentParser(
+        description='Manage terraform providers and their resources')
     subparsers = parser.add_subparsers(
         title='Download, get or list providers',
         metavar='command')
 
     parser.add_argument(
-        '--provider-folder', default='./folder',
+        '--provider-folder', default='./resources',
         help='providers resource folder')
 
     dowload_parser = subparsers.add_parser(
@@ -44,7 +49,6 @@ def cli():
         help='provider version to download. Ex: 4.25.0')
     dowload_parser.set_defaults(handle=subcommands.download)
 
-
     get_parser = subparsers.add_parser(
         'get',
         help='Get provider details')
@@ -58,7 +62,7 @@ def cli():
         help='List providers')
     list_parser.set_defaults(handle=subcommands.list)
 
-    parser.parse_args()  
+    parser.parse_args()
     args = parser.parse_args()
     if not hasattr(args, 'handle'):
         parser.print_help()
