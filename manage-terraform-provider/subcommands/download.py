@@ -5,7 +5,6 @@ import shutil
 from typing import final
 from utilities import logging, loading
 from utilities import logging
-import logging
 import requests
 import sys
 import subprocess
@@ -122,6 +121,7 @@ def provider_schema_exportation(workdir, terraform_data_file_name=PROVIDER_DATA_
         with open('{}/{}'.format(workdir, terraform_data_file_name), "w") as outfile:
             subprocess.check_call(['terraform', 'providers', 'schema', '-json'],
                                   cwd=workdir, stderr=subprocess.STDOUT, stdout=outfile)
+        
     except subprocess.CalledProcessError as exc:
         loader.stop(output=False)
     else:
@@ -167,7 +167,7 @@ def download_provider_documentation(repository_url, tag, target_folder, temporar
                         resource_regex, md_file.read(), re.MULTILINE)
                     if res:
                         shutil.copy(path.absolute(), os.path.join(
-                            resource_type_full_path, '{}.markdown'.format(res.group(1))))
+                            resource_type_full_path, '{}.markdown'.format(res.group(1).replace('\\', ''))))
             except Exception as e:
                 logger.warning(e)
 
@@ -214,7 +214,7 @@ def download_cmd(args):
                 if not os.path.isfile(os.path.join(full_path, PROVIDER_TF_TEMPLATE_FILE)):
                     produce_provider_file(
                         provider_name, provider_version, provider_alias, full_path)
-                if os.path.join(full_path, PROVIDER_DATA_FILE):
+                # if not os.path.join(full_path, PROVIDER_DATA_FILE):
                     provider_schema_exportation(full_path)
                     add_data_description(full_path)
             except OSError as err:
